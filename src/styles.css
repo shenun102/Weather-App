@@ -123,7 +123,7 @@ body {
   background-color: #5a5a5a;
   border-radius: 1rem;
   display: grid;
-  grid-template-rows: repeat(10 1fr);
+  grid-template-rows: repeat(5 1fr);
 }
 
 .time-container {
@@ -131,8 +131,14 @@ body {
   width: 100%;
   display: grid;
   grid-template-columns: 1fr 1fr 2fr;
+  grid-template-rows: 1fr;
+}
+
+.time,
+.temp,
+.weather-icon {
   text-align: center;
-  align-content: center;
+  align-self: center;
 }
 
 .content-bot-right {

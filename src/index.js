@@ -1,11 +1,13 @@
 import "./styles.css";
+
+import rainIcon from "./icons/rain.png";
 import { format, add, parse } from "date-fns";
 console.log("Hello");
 
 const searchBar = document.querySelector("#search-bar");
 const date1 = format(new Date(), "yyyy-MM-dd");
 const date2 = format(add(date1, { days: 7 }), "yyyy-MM-dd");
-const symbol = `°C`;
+const symbol = `°F`;
 
 // yyyy-MM-dd format
 // const date1 = "2024-09-02";
@@ -176,37 +178,49 @@ function displayHourlyData(day) {
   console.log("Doing the hourly data");
   console.log(day.date);
   console.log(day.hours);
+  
+  // Select all time containers
   const timeContainers = document.querySelectorAll(".time-container");
+  
+  // Get current time in 'h a' format
   const currentTime = format(new Date(), "h a");
   console.log(currentTime);
+  
   if (day.date === date1) {
-    console.log(`Oh Thats Today`);
-    // Find the object in hours property array corresponding to current hour
-    const startTime = day.hours.findIndex(
+    console.log("Oh That's Today");
+    
+    // Find the index of the current hour
+    const startTimeIndex = day.hours.findIndex(
       (hour) => convertTime(hour.time) === currentTime
     );
 
-    console.log("StartTime", startTime);
-    for (let i = 0; i < 10; i++) {
-      console.log(startTime + i);
-      if (startTime + i > 23) {
-        timeContainers[i].querySelector(".time").textContent = "";
-        timeContainers[i].querySelector(".temp").textContent = "";
-        timeContainers[i].querySelector(".weather-icon").textContent = "";
-        break;
+    console.log("StartTime", startTimeIndex);
+    
+    if (startTimeIndex === -1) {
+      console.log("Current time not found in the hourly data.");
+      return; // Exit function if current time is not found
+    }
+    
+    // Populate time containers
+    for (let i = 0; i < timeContainers.length; i++) {
+      const index = startTimeIndex + i;
+      
+      if (index >= day.hours.length) {
+        // If index is out of bounds of day.hours array
+        break; // stop the function
       }
 
-      const time = convertTime(day.hours[i + startTime].time);
-      console.log(time, day.hours[i + startTime].icon);
+      const time = convertTime(day.hours[index].time);
+      const iconSrc = day.hours[index].icon; // Assuming you get the correct icon source
 
       timeContainers[i].querySelector(".time").textContent = time;
-      timeContainers[i].querySelector(".temp").textContent =
-        day.hours[i + startTime].temp.toFixed(1);
-      timeContainers[i].querySelector(".weather-icon").textContent =
-        day.hours[i + startTime].icon;
+      timeContainers[i].querySelector(".temp").textContent = day.hours[index].temp.toFixed(1)+symbol;
+      timeContainers[i].querySelector(".weather-icon").innerHTML = `<img src="${rainIcon}" alt="weather icon" style="width:30%">`;
     }
   }
 }
+
+// Convert date format yyyy-MM-dd to Monday, Tuesday etc
 
 function convertToDaysOfWeek(data) {
   const dateStrings = [];
@@ -219,6 +233,8 @@ function convertToDaysOfWeek(data) {
 
   return daysOfWeek;
 }
+
+// Convert time HH:MM:SS to 1am, 4pm etc.
 
 function convertTime(timeStr) {
   // Parse the time string (HH:MM:SS) into a Date object
