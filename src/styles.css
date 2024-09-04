@@ -91,6 +91,7 @@ body {
 
 .content-bot {
   width: 90%;
+  max-height: 62.5vh;
   height: 100%;
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
@@ -120,10 +121,15 @@ body {
 /* Bottom mid content */
 
 .content-bot-mid {
+  height: 100%;
+  max-height: 62.5vh;
   background-color: #5a5a5a;
   border-radius: 1rem;
-  display: grid;
-  grid-template-rows: repeat(5 1fr);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem 0 1rem 1rem;
+  box-sizing: border-box;
 }
 
 .time-container {
@@ -142,6 +148,7 @@ body {
 }
 
 .content-bot-right {
+  max-height: 62.5vh;
   background-color: #5a5a5a;
   border-radius: 1rem;
   display: grid;
@@ -156,4 +163,24 @@ body {
 
 .content-bot-right .summary {
   font-size: 1rem;
+}
+
+/* Scrollbar */
+/* Custom Scrollbar Styles */
+.content-bot-mid::-webkit-scrollbar {
+  width: 0.5rem; /* Width of the scrollbar */
+}
+
+.content-bot-mid::-webkit-scrollbar-track {
+  background: transparent; /* Background of the scrollbar track */
+  border-radius: 10px; /* Rounded corners for the track */
+}
+
+.content-bot-mid::-webkit-scrollbar-thumb {
+  background-color: #888; /* Color of the scrollbar handle */
+  border-radius: 10px; /* Rounded corners for the handle */
+}
+
+.content-bot-mid::-webkit-scrollbar-thumb:hover {
+  background-color: #555; /* Darken the scrollbar handle on hover */
 }

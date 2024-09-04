@@ -6,25 +6,35 @@ console.log("Hello");
 
 const searchBar = document.querySelector("#search-bar");
 const date1 = format(new Date(), "yyyy-MM-dd");
-const date2 = format(add(date1, { days: 7 }), "yyyy-MM-dd");
-const symbol = `°F`;
+const date2 = format(add(date1, { days: 6 }), "yyyy-MM-dd");
+let symbol = `°F`;
 
 // yyyy-MM-dd format
 // const date1 = "2024-09-02";
 // const date2 = "2024-09-09";
 
-class Location {
-  constructor(data) {
-    this.location = data.resolvedAddress;
-    this.days = data.days;
+// Add event listener for changing the units from celcius to fahrenheit or vice versa
+const tempUnitBtn = document.querySelector(".temp-unit-btn");
+tempUnitBtn.addEventListener("click", changeTempUnits);
+
+function changeTempUnits(e) {
+  console.log(e.target);
+  symbol = symbol === `°F` ? `°C` : `°F`;
+  tempUnitBtn.textContent =
+    tempUnitBtn.textContent === `Fahrenheit` ? `Celcius` : `Fahrenheit`;
+  console.log(symbol);
+
+  // Redisplay current data
+  const storedWeatherData = getStoredData();
+  if (storedWeatherData) {
+    const extractedData = newDailyWeather(storedWeatherData);
+    displayDailyData(extractedData);
+    displayToday(extractedData[0]);
+    displayHourlyData(extractedData, 1);
   }
 }
 
-class Weather {
-  constructor(data) {
-    this.icon = data.days.icon;
-  }
-}
+// Add event listener for when the user searches
 
 // searchBar.addEventListener("keydown"
 document.addEventListener("DOMContentLoaded", async function (e) {
@@ -52,7 +62,9 @@ document.addEventListener("DOMContentLoaded", async function (e) {
   console.log("This is the data:", extractedData);
   // Display daily data
   displayDailyData(extractedData);
-  displayHourlyData(extractedData[0]);
+  displayToday(extractedData[0]);
+  console.log(extractedData);
+  displayHourlyData(extractedData, 1);
 });
 
 async function getWeatherData() {
@@ -77,6 +89,30 @@ async function getWeatherData() {
   } catch (error) {
     console.error("There was a problem with the fetch operation.", error);
     return null;
+  }
+}
+
+// Add event listener for when user selects one of the days
+
+const dayContainers = document.querySelectorAll(".day-container");
+dayContainers.forEach((container) =>
+  container.addEventListener("click", handleContainerClick)
+);
+function handleContainerClick(e) {
+  // Makes sure that no matter which target is clicked as long as its in the contianer it will point to container
+  const dayContainer = e.target.closest(".day-container");
+  // Highlight container
+  // dayContainer.style.toggle("highlighted")
+  
+  console.log(dayContainer.dataset.dindex);
+  const index = dayContainer.dataset.dindex;
+  // Use index to display corresponding day
+  // Get the data
+  // Redisplay current data
+  const storedWeatherData = getStoredData();
+  if (storedWeatherData) {
+    const extractedData = newDailyWeather(storedWeatherData);
+    displayHourlyData(extractedData, index);
   }
 }
 
@@ -173,38 +209,31 @@ function displayDailyData(data) {
 }
 
 // Display hourly data
+// Change this to displayTodays data
 
-function displayHourlyData(day) {
-  console.log("Doing the hourly data");
-  console.log(day.date);
-  console.log(day.hours);
-  
+function displayToday(day) {
   // Select all time containers
   const timeContainers = document.querySelectorAll(".time-container");
-  
+
   // Get current time in 'h a' format
-  const currentTime = format(new Date(), "h a");
-  console.log(currentTime);
-  
+  const currentTime = format(new Date(), "h:mm a");
+
+  // If the date is today
   if (day.date === date1) {
-    console.log("Oh That's Today");
-    
     // Find the index of the current hour
     const startTimeIndex = day.hours.findIndex(
       (hour) => convertTime(hour.time) === currentTime
     );
 
-    console.log("StartTime", startTimeIndex);
-    
     if (startTimeIndex === -1) {
       console.log("Current time not found in the hourly data.");
       return; // Exit function if current time is not found
     }
-    
+
     // Populate time containers
     for (let i = 0; i < timeContainers.length; i++) {
       const index = startTimeIndex + i;
-      
+
       if (index >= day.hours.length) {
         // If index is out of bounds of day.hours array
         break; // stop the function
@@ -214,9 +243,56 @@ function displayHourlyData(day) {
       const iconSrc = day.hours[index].icon; // Assuming you get the correct icon source
 
       timeContainers[i].querySelector(".time").textContent = time;
-      timeContainers[i].querySelector(".temp").textContent = day.hours[index].temp.toFixed(1)+symbol;
-      timeContainers[i].querySelector(".weather-icon").innerHTML = `<img src="${rainIcon}" alt="weather icon" style="width:30%">`;
+      timeContainers[i].querySelector(".temp").textContent =
+        day.hours[index].temp.toFixed(1) + symbol;
+      timeContainers[i].querySelector(
+        ".weather-icon"
+      ).innerHTML = `<img src="${rainIcon}" alt="weather icon" style="width:30%">`;
+      // TODO Replace the icon containers with the correct Corresponsing icons
     }
+  }
+}
+
+// Add a function that handles hourly data
+// Make it so the hours section can be scrolled down to see hours 0:00 to 23:00 etc
+
+function displayHourlyData(data, index) {
+  const timeContainerHTML = `
+  <div class="time-container">
+    <div class="time"></div>
+    <div class="temp"></div>
+    <div class="weather-icon"></div>
+  </div>`;
+  console.log(data);
+  const daysAfterToday = data.splice(1);
+  console.log(daysAfterToday);
+
+  // TODO The index will depend on the which weekday the user selects using a eventlistener
+  // index = 1;
+  console.log(daysAfterToday[index].hours);
+
+  // Select the botmid container
+  const botMidContainer = document.querySelector(".content-bot-mid");
+
+  // Set the bot-mid container overflow to auto
+  botMidContainer.style.overflow = "auto";
+
+  // Add 24 time-containers to the container
+  botMidContainer.innerHTML = new Array(24).fill(timeContainerHTML).join("");
+
+  // Select all time containers
+  const timeContainers = document.querySelectorAll(".time-container");
+  // Populate time containers
+  for (let i = 0; i < timeContainers.length; i++) {
+    const time = convertTime(daysAfterToday[index].hours[i].time);
+    // const iconSrc = day.hours[index].icon; // Assuming you get the correct icon source
+
+    timeContainers[i].querySelector(".time").textContent = time;
+    timeContainers[i].querySelector(".temp").textContent =
+      daysAfterToday[index].hours[i].temp.toFixed(1) + symbol;
+    timeContainers[i].querySelector(
+      ".weather-icon"
+    ).innerHTML = `<img src="${rainIcon}" alt="weather icon" style="width:30%">`;
   }
 }
 
@@ -247,5 +323,5 @@ function convertTime(timeStr) {
   date.setSeconds(seconds);
 
   // Format the time in 'h a' format (e.g., 5 pm, 4 pm)
-  return format(date, "h a");
+  return format(date, "h:mm a");
 }
