@@ -64,7 +64,7 @@ document.addEventListener("DOMContentLoaded", async function (e) {
   displayDailyData(extractedData);
   displayToday(extractedData[0]);
   console.log(extractedData);
-  displayHourlyData(extractedData, 1);
+  // displayHourlyData(extractedData, 1);
 });
 
 async function getWeatherData() {
@@ -101,17 +101,27 @@ dayContainers.forEach((container) =>
 function handleContainerClick(e) {
   // Makes sure that no matter which target is clicked as long as its in the contianer it will point to container
   const dayContainer = e.target.closest(".day-container");
+
   // Highlight container
-  // dayContainer.style.toggle("highlighted")
-  
-  console.log(dayContainer.dataset.dindex);
+  dayContainers.forEach((container) => container.classList.remove("selected"));
+  dayContainer.classList.add("selected");
+
+  // get the data attribute and set it as the index
   const index = dayContainer.dataset.dindex;
-  // Use index to display corresponding day
-  // Get the data
-  // Redisplay current data
+
+  // Get the data and use index  redisplay current data
   const storedWeatherData = getStoredData();
-  if (storedWeatherData) {
-    const extractedData = newDailyWeather(storedWeatherData);
+  if (!storedWeatherData) {
+    console.log("No data?");
+    return;
+  }
+
+  const extractedData = newDailyWeather(storedWeatherData);
+  if (index == "0") {
+    console.log("Heeeeeeee");
+    displayToday(extractedData[0]);
+  } else {
+    console.log("Hoooooooo");
     displayHourlyData(extractedData, index);
   }
 }
@@ -199,7 +209,8 @@ function displayDailyData(data) {
   // Convert days to days of the week
   const convertedDays = convertToDaysOfWeek(data);
   const dayContainers = document.querySelectorAll(".day-container");
-  for (let i = 0; i < data.length - 1; i++) {
+  console.log(dayContainers, "Hiyayayaya");
+  for (let i = 0; i < data.length; i++) {
     dayContainers[i].querySelector(".day-icon").textContent = data[i].icon;
     dayContainers[i].querySelector(".day").textContent = convertedDays[i];
     dayContainers[i].querySelector(
@@ -212,15 +223,35 @@ function displayDailyData(data) {
 // Change this to displayTodays data
 
 function displayToday(day) {
+
+  const timeContainerHTML = `
+  <div class="time-container">
+    <div class="time"></div>
+    <div class="temp"></div>
+    <div class="weather-icon"></div>
+  </div>`;
+  console.log(day);
+
+  // Select the botmid container
+  const botMidContainer = document.querySelector(".content-bot-mid");
+
+  // Add 24 time-containers to the container
+  botMidContainer.innerHTML = new Array(5).fill(timeContainerHTML).join("");
+
   // Select all time containers
   const timeContainers = document.querySelectorAll(".time-container");
 
   // Get current time in 'h a' format
-  const currentTime = format(new Date(), "h:mm a");
+  const currentTime = format(new Date(), "h a");
+
+  console.log("First day in array is", day.date, "today is, ", date1);
+  console.log(day.date === date1);
 
   // If the date is today
   if (day.date === date1) {
+    console.log("Oh thats today");
     // Find the index of the current hour
+    console.log(currentTime, day.hours[0].time);
     const startTimeIndex = day.hours.findIndex(
       (hour) => convertTime(hour.time) === currentTime
     );
@@ -264,7 +295,8 @@ function displayHourlyData(data, index) {
     <div class="weather-icon"></div>
   </div>`;
   console.log(data);
-  const daysAfterToday = data.splice(1);
+  // const daysAfterToday = data.splice(1);
+  const daysAfterToday = data;
   console.log(daysAfterToday);
 
   // TODO The index will depend on the which weekday the user selects using a eventlistener
@@ -294,6 +326,8 @@ function displayHourlyData(data, index) {
       ".weather-icon"
     ).innerHTML = `<img src="${rainIcon}" alt="weather icon" style="width:30%">`;
   }
+
+
 }
 
 // Convert date format yyyy-MM-dd to Monday, Tuesday etc
@@ -323,5 +357,5 @@ function convertTime(timeStr) {
   date.setSeconds(seconds);
 
   // Format the time in 'h a' format (e.g., 5 pm, 4 pm)
-  return format(date, "h:mm a");
+  return format(date, "h a");
 }
