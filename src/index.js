@@ -4,11 +4,9 @@ import { getWeatherData } from "./data";
 import { format, add, parse } from "date-fns";
 import { displayDailyData, displayHourlyData } from "./display-data";
 import { unit, changeTempUnits } from "./change-temp-unit";
-import { convertTime } from "./time-conversion";
 import { getStoredData } from "./local-storage";
 import { newDailyWeather } from "./data";
 import { handleContainerClick } from "./select-day";
-console.log("Hello");
 
 const searchBar = document.querySelector("#search-bar");
 const date1 = format(new Date(), "yyyy-MM-dd");

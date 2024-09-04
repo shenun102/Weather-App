@@ -1,10 +1,11 @@
 // display-data.js
-import rainIcon from "./icons/rain.png";
+
 import { unit, toCelcius } from "./change-temp-unit";
 import { format } from "date-fns";
-
 import { convertToDaysOfWeek, convertTime } from "./time-conversion";
-// import symbol from
+import { displayIcon } from "./icon";
+
+// Function to display daily data
 
 export function displayDailyData(data) {
   // Convert days to days of the week, i.e. monday tuesday etc.
@@ -13,12 +14,18 @@ export function displayDailyData(data) {
   const dayContainers = document.querySelectorAll(".day-container");
   // loop through all containers and replace the content with data
   for (let i = 0; i < data.length; i++) {
-    dayContainers[i].querySelector(".day-icon").textContent = data[i].icon;
+    dayContainers[i].querySelector(
+      ".day-icon"
+    ).innerHTML = `<img src="${displayIcon(
+      data[i].icon
+    )}" alt="weather icon" style="width:30%">`;
     dayContainers[i].querySelector(".day").textContent = convertedDays[i];
     dayContainers[i].querySelector(".data").textContent =
       unit == "°F" ? data[i].temp + unit : toCelcius(data[i].temp, unit);
   }
 }
+
+// Function to display hourly data
 
 export function displayHourlyData(extractedData, index) {
   // HTML for time container
@@ -36,9 +43,8 @@ export function displayHourlyData(extractedData, index) {
 
   // Add 5 or 24 time-containers to the container depending on if its today or a future day
   if (index == 0) {
-    const timeNow = format(new Date(), "H")
+    const timeNow = format(new Date(), "H");
     // Dynamically set the number of containers for today based on how many hours are left
-    console.log(timeNow)
     numOfContainers = 24 - timeNow;
   } else {
     numOfContainers = 24;
@@ -62,6 +68,8 @@ export function displayHourlyData(extractedData, index) {
   else displayFutureDay(extractedData, index, timeContainers);
 }
 
+// Helper function to display data for today
+
 function displayToday(day, timeContainers) {
   // Get the current time in 'hour am/pm format'
   const currentTime = format(new Date(), "h a");
@@ -70,8 +78,6 @@ function displayToday(day, timeContainers) {
   const startTimeIndex = day.hours.findIndex(
     (hour) => convertTime(hour.time) === currentTime
   );
-
-  console.log(currentTime, startTimeIndex);
 
   // Error handling
   if (startTimeIndex === -1) {
@@ -102,10 +108,14 @@ function displayToday(day, timeContainers) {
         : toCelcius(day.hours[index].temp.toFixed(1), unit);
     timeContainers[i].querySelector(
       ".weather-icon"
-    ).innerHTML = `<img src="${rainIcon}" alt="weather icon" style="width:30%">`;
+    ).innerHTML = `<img src="${displayIcon(
+      day.icon
+    )}" alt="weather icon" style="width:30%">`;
     // TODO Replace the icon containers with the correct Corresponsing icons
   }
 }
+
+// Helper function to display data for future days other than today
 
 function displayFutureDay(days, index, timeContainers) {
   // display other data
@@ -122,9 +132,13 @@ function displayFutureDay(days, index, timeContainers) {
         : toCelcius(days[index].hours[i].temp.toFixed(1), unit);
     timeContainers[i].querySelector(
       ".weather-icon"
-    ).innerHTML = `<img src="${rainIcon}" alt="weather icon" style="width:30%">`;
+    ).innerHTML = `<img src="${displayIcon(
+      days[index].icon
+    )}" alt="weather icon" style="width:30%">`;
   }
 }
+
+// Helper function to display other miscallaneous data
 
 function displayOtherData(day, isToday, currentTimeIndex) {
   const contentTop = document.querySelector(".content-top");
