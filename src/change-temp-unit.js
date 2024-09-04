@@ -9,14 +9,20 @@ export function changeTempUnits(e) {
   unit = unit === `°F` ? `°C` : `°F`;
   tempUnitBtn.textContent =
     tempUnitBtn.textContent === `Fahrenheit` ? `Celcius` : `Fahrenheit`;
-  console.log(unit);
 
+  const currentContainer = document.querySelector(".selected")
+  const index = (currentContainer.dataset.dindex)
   // Redisplay current data
   const storedWeatherData = getStoredData();
   if (storedWeatherData) {
     const extractedData = newDailyWeather(storedWeatherData);
     displayDailyData(extractedData);
     // Display the current day?
-    displayHourlyData(extractedData, 1);
+    displayHourlyData(extractedData, index);
   }
+}
+
+export function toCelcius(temperature, unit) {
+  const celcius = ((temperature - 32) / 1.8).toFixed(1) + unit;
+  return celcius;
 }

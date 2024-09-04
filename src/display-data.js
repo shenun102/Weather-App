@@ -1,6 +1,6 @@
 // display-data.js
 import rainIcon from "./icons/rain.png";
-import { unit } from "./change-temp-unit";
+import { unit, toCelcius } from "./change-temp-unit";
 import { format } from "date-fns";
 
 import { convertToDaysOfWeek, convertTime } from "./time-conversion";
@@ -15,9 +15,8 @@ export function displayDailyData(data) {
   for (let i = 0; i < data.length; i++) {
     dayContainers[i].querySelector(".day-icon").textContent = data[i].icon;
     dayContainers[i].querySelector(".day").textContent = convertedDays[i];
-    dayContainers[i].querySelector(
-      ".data"
-    ).textContent = `${data[i].temp}${unit}`;
+    dayContainers[i].querySelector(".data").textContent =
+      unit == "°F" ? data[i].temp + unit : toCelcius(data[i].temp, unit);
   }
 }
 
@@ -37,7 +36,10 @@ export function displayHourlyData(extractedData, index) {
 
   // Add 5 or 24 time-containers to the container depending on if its today or a future day
   if (index == 0) {
-    numOfContainers = 5;
+    const timeNow = format(new Date(), "H")
+    // Dynamically set the number of containers for today based on how many hours are left
+    console.log(timeNow)
+    numOfContainers = 24 - timeNow;
   } else {
     numOfContainers = 24;
   }
@@ -52,12 +54,12 @@ export function displayHourlyData(extractedData, index) {
   const timeContainers = document.querySelectorAll(".time-container");
 
   // Populate the containers
-
-  // Display today
-  // displayToday(extractedData[index], timeContainers);
-
+  if (index == "0") {
+    displayToday(extractedData[index], timeContainers);
+    // Display today
+  }
   // Display future day
-  displayFutureDay(extractedData, index, timeContainers)
+  else displayFutureDay(extractedData, index, timeContainers);
 }
 
 function displayToday(day, timeContainers) {
@@ -69,11 +71,15 @@ function displayToday(day, timeContainers) {
     (hour) => convertTime(hour.time) === currentTime
   );
 
+  console.log(currentTime, startTimeIndex);
+
   // Error handling
   if (startTimeIndex === -1) {
     console.log("Current time not found in the hourly data.");
     return; // Exit function if current time is not found
   }
+
+  displayOtherData(day, true, startTimeIndex);
 
   // Populate time containers
   // Loop through the nodelist of time containers
@@ -91,7 +97,9 @@ function displayToday(day, timeContainers) {
 
     timeContainers[i].querySelector(".time").textContent = time;
     timeContainers[i].querySelector(".temp").textContent =
-      day.hours[index].temp.toFixed(1) + unit;
+      unit == "°F"
+        ? day.hours[index].temp.toFixed(1) + unit
+        : toCelcius(day.hours[index].temp.toFixed(1), unit);
     timeContainers[i].querySelector(
       ".weather-icon"
     ).innerHTML = `<img src="${rainIcon}" alt="weather icon" style="width:30%">`;
@@ -100,6 +108,8 @@ function displayToday(day, timeContainers) {
 }
 
 function displayFutureDay(days, index, timeContainers) {
+  // display other data
+  displayOtherData(days[index]);
   // Populate time containrs
   for (let i = 0; i < timeContainers.length; i++) {
     const time = convertTime(days[index].hours[i].time);
@@ -107,9 +117,45 @@ function displayFutureDay(days, index, timeContainers) {
 
     timeContainers[i].querySelector(".time").textContent = time;
     timeContainers[i].querySelector(".temp").textContent =
-      days[index].hours[i].temp.toFixed(1) + unit;
+      unit == "°F"
+        ? days[index].hours[i].temp.toFixed(1) + unit
+        : toCelcius(days[index].hours[i].temp.toFixed(1), unit);
     timeContainers[i].querySelector(
       ".weather-icon"
     ).innerHTML = `<img src="${rainIcon}" alt="weather icon" style="width:30%">`;
   }
+}
+
+function displayOtherData(day, isToday, currentTimeIndex) {
+  const contentTop = document.querySelector(".content-top");
+  const location = document.querySelector(".location");
+  const temperature = document.querySelector(".temperature");
+  const description = document.querySelector(".description");
+  // location.textContent = ?
+
+  if (isToday) {
+    temperature.textContent =
+      unit == `°F`
+        ? `${parseFloat(day.hours[currentTimeIndex].temp)}${unit}`
+        : toCelcius(parseFloat(day.hours[currentTimeIndex].temp), unit);
+  } else
+    temperature.textContent =
+      unit == `°F`
+        ? `${parseFloat(day.temp).toFixed(1)} ${unit}`
+        : toCelcius(parseFloat(day.temp).toFixed(1), unit);
+
+  description.textContent = day.description;
+
+  // Bot right data
+  const botRightContainer = document.querySelector(".content-bot-right");
+  document.querySelector(
+    ".wind"
+  ).textContent = `Wind Speed: ${day.windspeed}km/s`;
+  document.querySelector(
+    ".humidity"
+  ).textContent = `Humidity: ${day.humidity}%`;
+  document.querySelector(".uv").textContent = `UV-Index: ${day.uvindex}`;
+  document.querySelector(
+    ".rain-percent"
+  ).textContent = `Rain: ${day.precipprob}%`;
 }
