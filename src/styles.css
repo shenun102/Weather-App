@@ -91,7 +91,7 @@ body {
 
 .content-bot {
   width: 90%;
-  max-height: 62.5vh;
+  max-height: 60vh;
   height: 100%;
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;

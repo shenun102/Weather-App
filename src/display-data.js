@@ -19,9 +19,10 @@ export function displayDailyData(data) {
     ).innerHTML = `<img src="${displayIcon(
       data[i].icon
     )}" alt="weather icon" style="width:30%">`;
-    dayContainers[i].querySelector(".day").textContent = convertedDays[i];
+    dayContainers[i].querySelector(".day").textContent =
+      i == 0 ? `Today` : convertedDays[i];
     dayContainers[i].querySelector(".data").textContent =
-      unit == "°F" ? data[i].temp + unit : toCelcius(data[i].temp, unit);
+      unit == "°F" ? "Avg: " + data[i].temp + unit : "Avg: " + toCelcius(data[i].temp, unit);
   }
 }
 
@@ -71,19 +72,9 @@ export function displayHourlyData(extractedData, index) {
 // Helper function to display data for today
 
 function displayToday(day, timeContainers) {
-  // Get the current time in 'hour am/pm format'
-  const currentTime = format(new Date(), "h a");
 
   // Find the index of the current hour
-  const startTimeIndex = day.hours.findIndex(
-    (hour) => convertTime(hour.time) === currentTime
-  );
-
-  // Error handling
-  if (startTimeIndex === -1) {
-    console.log("Current time not found in the hourly data.");
-    return; // Exit function if current time is not found
-  }
+  const startTimeIndex = getCurrentTimeIndex(day)
 
   displayOtherData(day, true, startTimeIndex);
 
@@ -141,11 +132,8 @@ function displayFutureDay(days, index, timeContainers) {
 // Helper function to display other miscallaneous data
 
 function displayOtherData(day, isToday, currentTimeIndex) {
-  const contentTop = document.querySelector(".content-top");
-  const location = document.querySelector(".location");
   const temperature = document.querySelector(".temperature");
   const description = document.querySelector(".description");
-  // location.textContent = ?
 
   if (isToday) {
     temperature.textContent =
@@ -161,7 +149,6 @@ function displayOtherData(day, isToday, currentTimeIndex) {
   description.textContent = day.description;
 
   // Bot right data
-  const botRightContainer = document.querySelector(".content-bot-right");
   document.querySelector(
     ".wind"
   ).textContent = `Wind Speed: ${day.windspeed}km/s`;
@@ -172,4 +159,24 @@ function displayOtherData(day, isToday, currentTimeIndex) {
   document.querySelector(
     ".rain-percent"
   ).textContent = `Rain: ${day.precipprob}%`;
+}
+
+// Helper function to get current time index
+
+function getCurrentTimeIndex(day) {
+  // Get the current time in 'hour am/pm format'
+  const currentTime = format(new Date(), "h a");
+
+  // Find the index of the current hour
+  const startTimeIndex = day.hours.findIndex(
+    (hour) => convertTime(hour.time) === currentTime
+  );
+
+  // Error handling
+  if (startTimeIndex === -1) {
+    console.log("Current time not found in the hourly data.");
+    return; // Exit function if current time is not found
+  }
+
+  return startTimeIndex;
 }

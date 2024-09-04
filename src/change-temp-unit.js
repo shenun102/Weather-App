@@ -1,6 +1,5 @@
-import { tempUnitBtn } from ".";
-import { getStoredData } from "./local-storage";
-import { newDailyWeather } from "./data";
+import { tempUnitBtn, extractedData } from ".";
+
 import { displayDailyData, displayHourlyData } from "./display-data";
 
 export let unit = `°F`;
@@ -13,13 +12,9 @@ export function changeTempUnits(e) {
   const currentContainer = document.querySelector(".selected");
   const index = currentContainer.dataset.dindex;
   // Redisplay current data
-  const storedWeatherData = getStoredData();
-  if (storedWeatherData) {
-    const extractedData = newDailyWeather(storedWeatherData);
-    displayDailyData(extractedData);
-    // Display the current day?
-    displayHourlyData(extractedData, index);
-  }
+  displayDailyData(extractedData);
+  // Display the current day?
+  displayHourlyData(extractedData, index);
 }
 
 export function toCelcius(temperature, unit) {

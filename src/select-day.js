@@ -1,8 +1,6 @@
 // select-day.js
 
-import { dayContainers } from ".";
-import { getStoredData } from "./local-storage";
-import { newDailyWeather } from "./data";
+import { dayContainers, extractedData } from ".";
 import { displayHourlyData } from "./display-data";
 
 export function handleContainerClick(e) {
@@ -15,14 +13,5 @@ export function handleContainerClick(e) {
 
   // get the data attribute and set it as the index
   const index = dayContainer.dataset.dindex;
-
-  // Get the data and use index  redisplay current data
-  const storedWeatherData = getStoredData();
-  if (!storedWeatherData) {
-    console.log("No data?");
-    return;
-  }
-
-  const extractedData = newDailyWeather(storedWeatherData);
   displayHourlyData(extractedData, index);
 }

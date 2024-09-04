@@ -1,4 +1,9 @@
+import { searchBar } from ".";
+import { format, add } from "date-fns";
 // Classes
+
+const date1 = format(new Date(), "yyyy-MM-dd");
+const date2 = format(add(date1, { days: 6 }), "yyyy-MM-dd");
 
 class Day {
   hours = [];
@@ -45,7 +50,7 @@ export async function getWeatherData() {
   try {
     const search = searchBar.value;
 
-    const api = `https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/London,UK/${date1}/${date2}?key=LD2BL6LAZPTF26LHHMWHG3RY6`;
+    const api = `https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/${searchBar.value}/${date1}/${date2}?key=LD2BL6LAZPTF26LHHMWHG3RY6`;
 
     console.log(api);
     // fetch response
